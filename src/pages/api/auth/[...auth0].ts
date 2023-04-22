@@ -1,16 +1,42 @@
-import { handleAuth, handleLogin } from "@auth0/nextjs-auth0";
-
-/* This creates the following routes:
-/api/auth/login: The route used to perform login with Auth0.
-/api/auth/logout: The route used to log the user out.
-/api/auth/callback: The route Auth0 will redirect the user to after a successful login.
-/api/auth/me: The route to fetch the user profile from.
-*/
+import { NextApiRequest, NextApiResponse } from "next";
+import { handleAuth, handleLogin, handleLogout, handleCallback, handleProfile } from "@auth0/nextjs-auth0";
 
 export default handleAuth({
-  async login(req, res) {
-    await handleLogin(req, res, {
-      returnTo: "/main",
-    });
+  async login(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      await handleLogin(req, res, {
+        returnTo: "/main",
+      });
+    } catch (error : any ) {
+      console.error(error);
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+
+  async logout(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      await handleLogout(req, res);
+    } catch (error : any) {
+      console.error(error);
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+
+  async callback(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      await handleCallback(req, res, { redirectUri: "http://localhost:3000" });
+    } catch (error : any ) {
+      console.error(error);
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+
+  async me(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      await handleProfile(req, res);
+    } catch (error : any) {
+      console.error(error);
+      res.status(error.status || 500).end(error.message);
+    }
   },
 });

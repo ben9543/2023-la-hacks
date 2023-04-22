@@ -1,29 +1,81 @@
 import React, { useState } from "react";
 import axios from "axios";
 import {getCohereResponse} from "@/pages/api/cohere/cohere-api";
+import {
+  addDoc,
+  collection,
+  doc,
+  getFirestore,
+  setDoc,
+  collectionGroup,
+  updateDoc,
+} from "firebase/firestore";
+import { app } from "@/firebase";
+import Link from "next/link";
+import Footer from "../../components/Footer";
+
+const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
+
+const cuisines: string[] = [
+  "🇮🇹 Italian",
+  "🇲🇽 Mexican",
+  "🇨🇳 Chinese",
+  "🇯🇵 Japanese",
+  "🇹🇭 Thai",
+  "🇮🇳 Indian",
+  "🇬🇷 Greek",
+  "🇫🇷 French",
+  "🇺🇸 American",
+  "🇻🇳 Vietnamese",
+  "🇰🇷 Korean",
+  "🇪🇸 Spanish",
+];
+const budgets: string[] = [
+  "💰 Cheap eats",
+  "💸 Moderate budget",
+  "💵 High-end dining",
+  "💳 Splurge-worthy",
+];
+
+const accommodations: string[] = [
+  "🅿️ Valet parking",
+  "🚗 Parking lot",
+  "📶 Free Wi-Fi",
+  "👥 Private dining",
+  "👶 Family-friendly",
+  "♿ Wheelchair accessible",
+  "🐶 Dog-friendly",
+  "🌱 Vegan options",
+  "🍾 Full bar",
+  "🍷 Extensive wine list",
+  "🍺 Craft beer selection",
+  "🎂 Birthday specials",
+  "🎶 Live music",
+  "🎭 Dinner theater",
+];
+
 interface CuisineProps {
   name: string;
   selectedChoices: string[];
+  alreadySelected: boolean;
+  category: number;
 }
 
+const selectedChoicesArray: string[][] = [[], [], [], [], []];
 
 const Cuisine: React.FC<CuisineProps> = (props) => {
-
-
-  const [selected, setSelected] = useState(false);
-
-  const selectedChoicesArray = props.selectedChoices;
+  const [selected, setSelected] = useState(false || props.alreadySelected);
 
 
   const handleClick = () => {
     setSelected(!selected);
     if (!selected) {
-      selectedChoicesArray.push(props.name);
+      selectedChoicesArray[props.category].push(props.name);
       console.log("added ", props.name, selectedChoicesArray);
     } else {
-      for (var i = 0; i < selectedChoicesArray.length; i++) {
-        if (selectedChoicesArray[i] === props.name) {
-          selectedChoicesArray.splice(i, 1);
+      for (var i = 0; i < selectedChoicesArray[props.category].length; i++) {
+        if (selectedChoicesArray[props.category][i] === props.name) {
+          selectedChoicesArray[props.category].splice(i, 1);
           console.log("removed ", props.name, selectedChoicesArray);
         }
       }
@@ -59,45 +111,10 @@ export default function Main() {
 
 
   };
-  const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
-
-  const cuisines: string[] = [
-    "🇮🇹 Italian",
-    "🇲🇽 Mexican",
-    "🇨🇳 Chinese",
-    "🇯🇵 Japanese",
-    "🇹🇭 Thai",
-    "🇮🇳 Indian",
-    "🇬🇷 Greek",
-    "🇫🇷 French",
-    "🇺🇸 American",
-    "🇻🇳 Vietnamese",
-    "🇰🇷 Korean",
-    "🇪🇸 Spanish",
-  ];
-  const budgets: string[] = [
-    "💰 Cheap eats",
-    "💸 Moderate budget",
-    "💵 High-end dining",
-    "💳 Splurge-worthy",
-  ];
-
-  const accommodations: string[] = [
-    "🅿️ Valet parking",
-    "🚗 Parking lot",
-    "📶 Free Wi-Fi",
-    "👥 Private dining",
-    "👶 Family-friendly",
-    "♿ Wheelchair accessible",
-    "🐶 Dog-friendly",
-    "🌱 Vegan options",
-    "🍾 Full bar",
-    "🍷 Extensive wine list",
-    "🍺 Craft beer selection",
-    "🎂 Birthday specials",
-    "🎶 Live music",
-    "🎭 Dinner theater",
-  ];
+  
+  function alreadySelected(name: string, category: number) {
+    return selectedChoicesArray[category].includes(name);
+  }
 
   const [step, setStep] = useState(1);
 
@@ -110,7 +127,13 @@ export default function Main() {
             <a className="text-4xl font-bold">When would you like to eat?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {meals.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n, 0)}
+                  category={0}
+                />
               ))}
             </div>
 
@@ -124,7 +147,13 @@ export default function Main() {
             </a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {cuisines.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n, 1)}
+                  category={1}
+                />
               ))}
             </div>
           </>
@@ -137,7 +166,13 @@ export default function Main() {
             </a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {budgets.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n, 2)}
+                  category={2}
+                />
               ))}
             </div>
           </>
@@ -148,12 +183,24 @@ export default function Main() {
             <a className="text-4xl font-bold">Any special accomodations?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {accommodations.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n, 3)}
+                  category={3}
+                />
               ))}
             </div>
           </>
         );
-      case 5:
+      case 5: {
+        setDoc(doc(collection(getFirestore(app), "data")), {
+          meals: selectedChoicesArray[0],
+          cuisines: selectedChoicesArray[1],
+          budgets: selectedChoicesArray[2],
+          accommodations: selectedChoicesArray[3],
+        });
         return (
           <>
             <a className="text-4xl font-bold">What's your location?</a>
@@ -167,38 +214,66 @@ export default function Main() {
             </form>
           </>
         );
-
-      default:
+      }
+      case 6: {
+        return (
+          <>
+            <a className="text-4xl font-bold mb-10">All complete!</a>
+          </>
+        );
+      }
+      default: {
         return <div>Invalid step</div>;
+      }
     }
   };
 
   return (
-    <div className="bg-base-100 flex flex-1 flex-col items-center">
-      <div className="flex flex-1 justify-center p-20">
-        <ul className="steps">
-          <li className={`step${step >= 1 ? " step-primary" : ""}`}>Meals</li>
-          <li className={`step${step >= 2 ? " step-primary" : ""}`}>Cuisine</li>
-          <li className={`step${step >= 3 ? " step-primary" : ""}`}>Budget</li>
-          <li className={`step${step >= 4 ? " step-primary" : ""}`}>
-            Accomodations
-          </li>
-          <li className={`step${step >= 5 ? " step-primary" : ""}`}>
-            Location
-          </li>
-          <li className={`step${step >= 6 ? " step-primary" : ""}`}>Result</li>
-        </ul>
-      </div>
-      {renderPage()}
-      <div className="flex flex-1 flex-row w-40 justify-evenly">
-        {step > 1 && (
-          <button onClick={() => setStep(step - 1)} className="btn">
-            Back
-          </button>
+    <div>
+      <div className="bg-base-100 flex flex-1 flex-col items-center">
+        <div className="navbar bg-base-200 rounded-3xl w-3/5">
+          <a href="/" className="btn btn-ghost normal-case text-xl">
+            Foodle
+          </a>
+        </div>
+        <div className="flex flex-1 justify-center p-20 h-fit">
+          <ul className="steps">
+            <li className={`step${step >= 1 ? " step-primary" : ""}`}>Meals</li>
+            <li className={`step${step >= 2 ? " step-primary" : ""}`}>
+              Cuisine
+            </li>
+            <li className={`step${step >= 3 ? " step-primary" : ""}`}>
+              Budget
+            </li>
+            <li className={`step${step >= 4 ? " step-primary" : ""}`}>
+              Accomodations
+            </li>
+            <li className={`step${step >= 5 ? " step-primary" : ""}`}>
+              Location
+            </li>
+            <li className={`step${step >= 6 ? " step-primary" : ""}`}>
+              Result
+            </li>
+          </ul>
+        </div>
+        {renderPage()}
+        {step === 6 && (
+          <Link href="/result">
+            <button className="btn w-40">Finish</button>
+          </Link>
         )}
-        <button onClick={() => setStep(step + 1)} className="btn">
-          Next
-        </button>
+        {step !== 6 && (
+          <div className="flex flex-1 flex-row w-40 justify-evenly">
+            {step > 1 && (
+              <button onClick={() => setStep(step - 1)} className="btn">
+                Back
+              </button>
+            )}
+            <button onClick={() => setStep(step + 1)} className="btn">
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

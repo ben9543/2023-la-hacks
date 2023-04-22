@@ -9,6 +9,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { app } from "@/firebase";
+import Link from "next/link";
 
 const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
 
@@ -185,6 +186,13 @@ export default function Main() {
           </>
         );
       }
+      case 6: {
+        return (
+          <>
+            <a className="text-4xl font-bold mb-10">All complete!</a>
+          </>
+        );
+      }
       default: {
         return <div>Invalid step</div>;
       }
@@ -208,16 +216,23 @@ export default function Main() {
         </ul>
       </div>
       {renderPage()}
-      <div className="flex flex-1 flex-row w-40 justify-evenly">
-        {step > 1 && (
-          <button onClick={() => setStep(step - 1)} className="btn">
-            Back
+      {step === 6 && (
+        <Link href="/result">
+          <button className="btn w-40">Finish</button>
+        </Link>
+      )}
+      {step !== 6 && (
+        <div className="flex flex-1 flex-row w-40 justify-evenly">
+          {step > 1 && (
+            <button onClick={() => setStep(step - 1)} className="btn">
+              Back
+            </button>
+          )}
+          <button onClick={() => setStep(step + 1)} className="btn">
+            Next
           </button>
-        )}
-        <button onClick={() => setStep(step + 1)} className="btn">
-          Next
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,16 +5,59 @@ import {
   doc,
   getFirestore,
   setDoc,
+  collectionGroup,
+  updateDoc,
 } from "firebase/firestore";
 import { app } from "@/firebase";
+
+const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
+
+const cuisines: string[] = [
+  "🇮🇹 Italian",
+  "🇲🇽 Mexican",
+  "🇨🇳 Chinese",
+  "🇯🇵 Japanese",
+  "🇹🇭 Thai",
+  "🇮🇳 Indian",
+  "🇬🇷 Greek",
+  "🇫🇷 French",
+  "🇺🇸 American",
+  "🇻🇳 Vietnamese",
+  "🇰🇷 Korean",
+  "🇪🇸 Spanish",
+];
+const budgets: string[] = [
+  "💰 Cheap eats",
+  "💸 Moderate budget",
+  "💵 High-end dining",
+  "💳 Splurge-worthy",
+];
+
+const accommodations: string[] = [
+  "🅿️ Valet parking",
+  "🚗 Parking lot",
+  "📶 Free Wi-Fi",
+  "👥 Private dining",
+  "👶 Family-friendly",
+  "♿ Wheelchair accessible",
+  "🐶 Dog-friendly",
+  "🌱 Vegan options",
+  "🍾 Full bar",
+  "🍷 Extensive wine list",
+  "🍺 Craft beer selection",
+  "🎂 Birthday specials",
+  "🎶 Live music",
+  "🎭 Dinner theater",
+];
 
 interface CuisineProps {
   name: string;
   selectedChoices: string[];
   alreadySelected: boolean;
+  category: number;
 }
 
-const selectedChoicesArray: string[] = [];
+const selectedChoicesArray: string[][] = [[], [], [], [], []];
 
 const Cuisine: React.FC<CuisineProps> = (props) => {
   const [selected, setSelected] = useState(false || props.alreadySelected);
@@ -22,12 +65,12 @@ const Cuisine: React.FC<CuisineProps> = (props) => {
   const handleClick = () => {
     setSelected(!selected);
     if (!selected) {
-      selectedChoicesArray.push(props.name);
+      selectedChoicesArray[props.category].push(props.name);
       console.log("added ", props.name, selectedChoicesArray);
     } else {
-      for (var i = 0; i < selectedChoicesArray.length; i++) {
-        if (selectedChoicesArray[i] === props.name) {
-          selectedChoicesArray.splice(i, 1);
+      for (var i = 0; i < selectedChoicesArray[props.category].length; i++) {
+        if (selectedChoicesArray[props.category][i] === props.name) {
+          selectedChoicesArray[props.category].splice(i, 1);
           console.log("removed ", props.name, selectedChoicesArray);
         }
       }
@@ -49,49 +92,9 @@ const Cuisine: React.FC<CuisineProps> = (props) => {
 };
 
 export default function Main() {
-  function alreadySelected(name: string) {
-    return selectedChoicesArray.includes(name);
+  function alreadySelected(name: string, category: number) {
+    return selectedChoicesArray[category].includes(name);
   }
-
-  const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
-
-  const cuisines: string[] = [
-    "🇮🇹 Italian",
-    "🇲🇽 Mexican",
-    "🇨🇳 Chinese",
-    "🇯🇵 Japanese",
-    "🇹🇭 Thai",
-    "🇮🇳 Indian",
-    "🇬🇷 Greek",
-    "🇫🇷 French",
-    "🇺🇸 American",
-    "🇻🇳 Vietnamese",
-    "🇰🇷 Korean",
-    "🇪🇸 Spanish",
-  ];
-  const budgets: string[] = [
-    "💰 Cheap eats",
-    "💸 Moderate budget",
-    "💵 High-end dining",
-    "💳 Splurge-worthy",
-  ];
-
-  const accommodations: string[] = [
-    "🅿️ Valet parking",
-    "🚗 Parking lot",
-    "📶 Free Wi-Fi",
-    "👥 Private dining",
-    "👶 Family-friendly",
-    "♿ Wheelchair accessible",
-    "🐶 Dog-friendly",
-    "🌱 Vegan options",
-    "🍾 Full bar",
-    "🍷 Extensive wine list",
-    "🍺 Craft beer selection",
-    "🎂 Birthday specials",
-    "🎶 Live music",
-    "🎭 Dinner theater",
-  ];
 
   const [step, setStep] = useState(1);
 
@@ -107,7 +110,8 @@ export default function Main() {
                   selectedChoices={[]}
                   key={n}
                   name={n}
-                  alreadySelected={alreadySelected(n)}
+                  alreadySelected={alreadySelected(n, 0)}
+                  category={0}
                 />
               ))}
             </div>
@@ -125,7 +129,8 @@ export default function Main() {
                   selectedChoices={[]}
                   key={n}
                   name={n}
-                  alreadySelected={alreadySelected(n)}
+                  alreadySelected={alreadySelected(n, 1)}
+                  category={1}
                 />
               ))}
             </div>
@@ -143,7 +148,8 @@ export default function Main() {
                   selectedChoices={[]}
                   key={n}
                   name={n}
-                  alreadySelected={alreadySelected(n)}
+                  alreadySelected={alreadySelected(n, 2)}
+                  category={2}
                 />
               ))}
             </div>
@@ -159,33 +165,26 @@ export default function Main() {
                   selectedChoices={[]}
                   key={n}
                   name={n}
-                  alreadySelected={alreadySelected(n)}
+                  alreadySelected={alreadySelected(n, 3)}
+                  category={3}
                 />
               ))}
             </div>
           </>
         );
       case 5: {
-        addDoc(collection(getFirestore(app), "data"), {
-          selectedChoicesArray,
+        setDoc(doc(collection(getFirestore(app), "data")), {
+          meals: selectedChoicesArray[0],
+          cuisines: selectedChoicesArray[1],
+          budgets: selectedChoicesArray[2],
+          accommodations: selectedChoicesArray[3],
         });
         return (
           <>
             <a className="text-4xl font-bold">What's your location?</a>
-            <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
-              {cuisines.map((n) => (
-                <Cuisine
-                  selectedChoices={[]}
-                  key={n}
-                  name={n}
-                  alreadySelected={alreadySelected(n)}
-                />
-              ))}
-            </div>
           </>
         );
       }
-
       default: {
         return <div>Invalid step</div>;
       }

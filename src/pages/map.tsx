@@ -1,18 +1,52 @@
-import React from 'react'
-import { useMemo } from 'react'
-import {GoogleMap,useLoadScript,Marker} from "@react-google-maps/api";
+import React from "react";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  useLoadScript,
+} from "@react-google-maps/api";
 
-const containerStyle = {position:"static"};
+const containerStyle = {
+  width: "100vh",
+  height: "100vh",
+};
 
+const center = {
+  lat: -3.745,
+  lng: -38.523,
+};
 
-export default function map(){
-    const{isLoaded}=useLoadScript({googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string})
-    if(!isLoaded) return <div>loading</div>;
-    return <Map/>
+function MyComponent() {
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+  });
+
+  const [map, setMap] = React.useState(null);
+
+  const onLoad = React.useCallback(function callback(map: any) {
+    // This is just an example of getting and using the map instance!!! don't just blindly copy!
+    const bounds = new window.google.maps.LatLngBounds(center);
+    map.fitBounds(bounds);
+
+    setMap(map);
+  }, []);
+
+  const onUnmount = React.useCallback(function callback(map: any) {
+    setMap(null);
+  }, []);
+
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={10}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+    >
+      <></>
+    </GoogleMap>
+  ) : (
+    <></>
+  );
 }
 
-
-function Map(){
-    return (<div className="mapDiv">
-    <GoogleMap zoom={10} center={{lat:44, lng:-80}} mapContainerClassName='penisballs'></GoogleMap></div>)
-}
+export default React.memo(MyComponent);

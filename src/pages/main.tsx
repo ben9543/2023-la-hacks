@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { app } from "@/firebase";
 import Link from "next/link";
+import Footer from "../../components/Footer";
 
 const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
 
@@ -200,39 +201,52 @@ export default function Main() {
   };
 
   return (
-    <div className="bg-base-100 flex flex-1 flex-col items-center">
-      <div className="flex flex-1 justify-center p-20">
-        <ul className="steps">
-          <li className={`step${step >= 1 ? " step-primary" : ""}`}>Meals</li>
-          <li className={`step${step >= 2 ? " step-primary" : ""}`}>Cuisine</li>
-          <li className={`step${step >= 3 ? " step-primary" : ""}`}>Budget</li>
-          <li className={`step${step >= 4 ? " step-primary" : ""}`}>
-            Accomodations
-          </li>
-          <li className={`step${step >= 5 ? " step-primary" : ""}`}>
-            Location
-          </li>
-          <li className={`step${step >= 6 ? " step-primary" : ""}`}>Result</li>
-        </ul>
-      </div>
-      {renderPage()}
-      {step === 6 && (
-        <Link href="/result">
-          <button className="btn w-40">Finish</button>
-        </Link>
-      )}
-      {step !== 6 && (
-        <div className="flex flex-1 flex-row w-40 justify-evenly">
-          {step > 1 && (
-            <button onClick={() => setStep(step - 1)} className="btn">
-              Back
-            </button>
-          )}
-          <button onClick={() => setStep(step + 1)} className="btn">
-            Next
-          </button>
+    <div>
+      <div className="bg-base-100 flex flex-1 flex-col items-center">
+        <div className="navbar bg-base-200 rounded-3xl w-3/5">
+          <a href="/" className="btn btn-ghost normal-case text-xl">
+            Foodle
+          </a>
         </div>
-      )}
+        <div className="flex flex-1 justify-center p-20 h-fit">
+          <ul className="steps">
+            <li className={`step${step >= 1 ? " step-primary" : ""}`}>Meals</li>
+            <li className={`step${step >= 2 ? " step-primary" : ""}`}>
+              Cuisine
+            </li>
+            <li className={`step${step >= 3 ? " step-primary" : ""}`}>
+              Budget
+            </li>
+            <li className={`step${step >= 4 ? " step-primary" : ""}`}>
+              Accomodations
+            </li>
+            <li className={`step${step >= 5 ? " step-primary" : ""}`}>
+              Location
+            </li>
+            <li className={`step${step >= 6 ? " step-primary" : ""}`}>
+              Result
+            </li>
+          </ul>
+        </div>
+        {renderPage()}
+        {step === 6 && (
+          <Link href="/result">
+            <button className="btn w-40">Finish</button>
+          </Link>
+        )}
+        {step !== 6 && (
+          <div className="flex flex-1 flex-row w-40 justify-evenly">
+            {step > 1 && (
+              <button onClick={() => setStep(step - 1)} className="btn">
+                Back
+              </button>
+            )}
+            <button onClick={() => setStep(step + 1)} className="btn">
+              Next
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

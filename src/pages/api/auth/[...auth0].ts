@@ -1,4 +1,4 @@
-import { handleAuth } from "@auth0/nextjs-auth0";
+import { handleAuth, handleLogin } from "@auth0/nextjs-auth0";
 
 /* This creates the following routes:
 /api/auth/login: The route used to perform login with Auth0.
@@ -7,4 +7,10 @@ import { handleAuth } from "@auth0/nextjs-auth0";
 /api/auth/me: The route to fetch the user profile from.
 */
 
-export default handleAuth();
+export default handleAuth({
+  async login(req, res) {
+    await handleLogin(req, res, {
+      returnTo: "/home",
+    });
+  },
+});

@@ -1,14 +1,23 @@
 import React, { useState } from "react";
+import {
+  addDoc,
+  collection,
+  doc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
+import { app } from "@/firebase";
 
 interface CuisineProps {
   name: string;
   selectedChoices: string[];
+  alreadySelected: boolean;
 }
 
-const Cuisine: React.FC<CuisineProps> = (props) => {
-  const [selected, setSelected] = useState(false);
+const selectedChoicesArray: string[] = [];
 
-  const selectedChoicesArray = props.selectedChoices;
+const Cuisine: React.FC<CuisineProps> = (props) => {
+  const [selected, setSelected] = useState(false || props.alreadySelected);
 
   const handleClick = () => {
     setSelected(!selected);
@@ -40,6 +49,10 @@ const Cuisine: React.FC<CuisineProps> = (props) => {
 };
 
 export default function Main() {
+  function alreadySelected(name: string) {
+    return selectedChoicesArray.includes(name);
+  }
+
   const meals: string[] = ["🍳 Breakfast", "🍔 Lunch", "🍲 Dinner", "🍪 Snack"];
 
   const cuisines: string[] = [
@@ -90,7 +103,12 @@ export default function Main() {
             <a className="text-4xl font-bold">When would you like to eat?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {meals.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n)}
+                />
               ))}
             </div>
           </>
@@ -103,7 +121,12 @@ export default function Main() {
             </a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {cuisines.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n)}
+                />
               ))}
             </div>
           </>
@@ -116,7 +139,12 @@ export default function Main() {
             </a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {budgets.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n)}
+                />
               ))}
             </div>
           </>
@@ -127,25 +155,40 @@ export default function Main() {
             <a className="text-4xl font-bold">Any special accomodations?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {accommodations.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n)}
+                />
               ))}
             </div>
           </>
         );
-      case 5:
+      case 5: {
+        addDoc(collection(getFirestore(app), "data"), {
+          selectedChoicesArray,
+        });
         return (
           <>
             <a className="text-4xl font-bold">What's your location?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {cuisines.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n)}
+                />
               ))}
             </div>
           </>
         );
+      }
 
-      default:
+      default: {
         return <div>Invalid step</div>;
+      }
     }
   };
 

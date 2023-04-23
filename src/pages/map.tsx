@@ -65,14 +65,14 @@ const PlacesAutocomplete = ({ setSelected }) => {
     value={value}
     onChange={(e) => setValue(e.target.value)}
     disabled={!ready}
-    className="w-3/6 text-center m-auto flex "
+    className="w-3/6 text-center mx-auto flex bg-neutral "
     placeholder="Wya neighbor"
    />
    <ComboboxPopover>
     <ComboboxList>
      {status === "OK" &&
       data.map(({ place_id, description }) => (
-       <ComboboxOption key={place_id} value={description} className="color-black"/>
+       <ComboboxOption key={place_id} value={description} className=""/>
       ))}
     </ComboboxList>
    </ComboboxPopover>

@@ -10,6 +10,8 @@ import {
   collectionGroup,
   updateDoc,
 } from "firebase/firestore";
+
+
 import { app } from "@/firebase";
 import Link from "next/link";
 import Footer from "../../components/Footer";
@@ -64,23 +66,29 @@ interface CuisineProps {
 const selectedChoicesArray: string[][] = [[], [], [], [], []];
 
 const Cuisine: React.FC<CuisineProps> = (props) => {
-  const [selected, setSelected] = useState(false || props.alreadySelected);
+  const [selected, setSelected] = useState(props.alreadySelected);
 
 
   const handleClick = () => {
     setSelected(!selected);
     if (!selected) {
+      if (!selectedChoicesArray[props.category]) {
+        selectedChoicesArray[props.category] = [];
+      }
       selectedChoicesArray[props.category].push(props.name);
       console.log("added ", props.name, selectedChoicesArray);
     } else {
-      for (var i = 0; i < selectedChoicesArray[props.category].length; i++) {
-        if (selectedChoicesArray[props.category][i] === props.name) {
-          selectedChoicesArray[props.category].splice(i, 1);
-          console.log("removed ", props.name, selectedChoicesArray);
+      if (selectedChoicesArray[props.category]) {
+        for (let i = 0; i < selectedChoicesArray[props.category].length; i++) {
+          if (selectedChoicesArray[props.category][i] === props.name) {
+            selectedChoicesArray[props.category].splice(i, 1);
+            console.log("removed ", props.name, selectedChoicesArray);
+          }
         }
       }
     }
   };
+
 
   console.log("selectedChoices", selectedChoicesArray);
 
@@ -98,25 +106,14 @@ const Cuisine: React.FC<CuisineProps> = (props) => {
 };
 
 export default function Main() {
-  const handleSubmit = async (e :any ) => {
-    e.preventDefault();
 
-    try {
-      const prompt = 'Can you list the ethnicities of India? Only include the names in the answer\n';
-      const response = await getCohereResponse(prompt);
-      console.log(`Prediction: ${response}`);
-    } catch (error) {
-      console.error('API call failed', error);
-    }
-
-
-  };
   
   function alreadySelected(name: string, category: number) {
     return selectedChoicesArray[category].includes(name);
   }
 
   const [step, setStep] = useState(1);
+  const [id, setId] = useState(null);
 
   const renderPage = () => {
     switch (step) {
@@ -180,7 +177,7 @@ export default function Main() {
       case 4:
         return (
           <>
-            <a className="text-4xl font-bold">Any special accomodations?</a>
+            <a className="text-4xl font-bold">Any special accommodations?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {accommodations.map((n) => (
                 <Cuisine
@@ -195,26 +192,29 @@ export default function Main() {
           </>
         );
       case 5: {
-        setDoc(doc(collection(getFirestore(app), "data")), {
-          meals: selectedChoicesArray[0],
-          cuisines: selectedChoicesArray[1],
-          budgets: selectedChoicesArray[2],
-          accommodations: selectedChoicesArray[3],
-        });
+        (() => {
+          addDoc(collection(getFirestore(app), "data"), {
+            meals: selectedChoicesArray[0],
+            cuisines: selectedChoicesArray[1],
+            budgets: selectedChoicesArray[2],
+            accommodations: selectedChoicesArray[3],
+          }).then((res) => {
+            setId(res.id);
+          });
+
+        })();
+        }
         return (
           <>
-            <a className="text-4xl font-bold">What's your location?</a>
+            <a className="text-4xl font-bold">What&apos;s your location?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {cuisines.map((n) => (
                 <Cuisine selectedChoices={[]} key={n} name={n} />
               ))}
             </div>
-            <form onSubmit={handleSubmit}>
-              <button type="submit">Get Prediction</button>
-            </form>
+
           </>
         );
-      }
       case 6: {
         return (
           <>
@@ -258,7 +258,7 @@ export default function Main() {
         </div>
         {renderPage()}
         {step === 6 && (
-          <Link href="/result">
+          <Link href={`/result?id=${id}`}>
             <button className="btn w-40">Finish</button>
           </Link>
         )}

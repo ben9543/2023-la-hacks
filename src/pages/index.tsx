@@ -66,11 +66,11 @@ export default function Home() {
           <div className="flex flex-1 my-10 w-3/5">
             <div className="w-1/2 flex justify-center">
               <Image
-                src="https://picsum.photos/300/300"
+                src="/../public/doggystyle.jpg"
                 alt="Test picture"
-                width={300}
-                height={300}
+                width={800}
                 className="rounded-3xl"
+                height={500}
               />
             </div>
             <div className="w-1/2 p-20">

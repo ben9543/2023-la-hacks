@@ -31,6 +31,8 @@ export default function Home() {
                     console.log("Document data:", data);
                     //setSelectedChoicesArray(data.selectedChoicesArray);
                     const prompt = `What's great ${data.cuisines} in ${data.location}?}`;
+                    setResult(await getCohereResponse(prompt));
+
                     console.log(`${data.accommodations} ${data.cuisines}`)
                     //getCohereResponse()
                 } else {
@@ -41,17 +43,7 @@ export default function Home() {
         fetchData();
     }, [id]);
 
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
 
-        try {
-            const prompt = "Can you list the ethnicities of India? Only include the names in the answer\n";
-            const response = await getCohereResponse(prompt);
-            console.log(`Prediction: ${response}`);
-        } catch (error) {
-            console.error("API call failed", error);
-        }
-    };
 
     return (
         <motion.div
@@ -60,11 +52,11 @@ export default function Home() {
             transition={{
                 duration: 0.75,
             }}
-            className="nav-bar bg-base-200"
+            // center a div in the middle of the screen in tailwind
+            className="justify-center items-center flex flex-col h-screen
+            bg-base-100"
         >
-            <div className="flex flex-col items-center bg-base-100 text-primary">
-
-            </div>
+            {result}
         </motion.div>
     );
 }

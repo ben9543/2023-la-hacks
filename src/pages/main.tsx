@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {getCohereResponse} from "@/pages/api/cohere/cohere-api";
+import { getCohereResponse } from "@/pages/api/cohere/cohere-api";
 import {
   addDoc,
   collection,
@@ -68,7 +68,6 @@ const selectedChoicesArray: string[][] = [[], [], [], [], []];
 const Cuisine: React.FC<CuisineProps> = (props) => {
   const [selected, setSelected] = useState(props.alreadySelected);
 
-
   const handleClick = () => {
     setSelected(!selected);
     if (!selected) {
@@ -101,7 +100,6 @@ const Cuisine: React.FC<CuisineProps> = (props) => {
     >
       {props.name}
     </button>
-
   );
 };
 
@@ -120,7 +118,6 @@ export default function Main() {
       case 1:
         return (
           <>
-
             <a className="text-4xl font-bold">When would you like to eat?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {meals.map((n) => (
@@ -133,7 +130,6 @@ export default function Main() {
                 />
               ))}
             </div>
-
           </>
         );
       case 2:
@@ -209,7 +205,13 @@ export default function Main() {
             <a className="text-4xl font-bold">What&apos;s your location?</a>
             <div className="flex flex-wrap gap-4 w-96 m-20 justify-center">
               {cuisines.map((n) => (
-                <Cuisine selectedChoices={[]} key={n} name={n} />
+                <Cuisine
+                  selectedChoices={[]}
+                  key={n}
+                  name={n}
+                  alreadySelected={alreadySelected(n, 4)}
+                  category={4}
+                />
               ))}
             </div>
 
@@ -233,7 +235,7 @@ export default function Main() {
       <div className="bg-base-100 flex flex-1 flex-col items-center">
         <div className="navbar bg-base-200 rounded-3xl w-3/5">
           <a href="/" className="btn btn-ghost normal-case text-xl">
-            Foodle
+            🍽️ Foodle
           </a>
         </div>
         <div className="flex flex-1 justify-center p-20 h-fit">

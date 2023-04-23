@@ -17,7 +17,7 @@ export default function Home() {
         <div className="bg-base-200 pb-8 w-3/5 rounded-2xl">
           <div className="navbar bg-base-200 rounded-3xl">
             <a href="" className="btn btn-ghost normal-case text-xl">
-              Foodle
+              🍽️ Foodle
             </a>
           </div>
           <div className="flex flex-col items-center mb-20">
